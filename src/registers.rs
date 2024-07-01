@@ -23,6 +23,14 @@ pub enum ByteRegisterLabel
     L
 }
 
+pub enum WordRegisterLabel
+{
+    AF,
+    BC,
+    DE,
+    HL
+}
+
 impl Registers
 {
     pub fn new() -> Self
@@ -42,11 +50,50 @@ impl Registers
     }
 
     // 8 BIT
-    pub fn get_byte(&self, label: ByteRegisterLabel) -> u8          { self.get_register_byte(label.shift()) }
-    pub fn set_byte(&mut self, label: ByteRegisterLabel, value: u8) { self.set_register_byte(label.shift(), value); }
+    pub fn get_byte(&self, label : ByteRegisterLabel) -> u8           { self.get_register_byte(label.shift()) }
+    pub fn set_byte(&mut self, label : ByteRegisterLabel, value : u8) { self.set_register_byte(label.shift(), value); }
 
     pub fn get_flag_byte(&self) -> FlagRegister                     { self.get_register_byte(ByteRegisterLabel::F.shift()).into() }
-    pub fn set_flag_byte(&mut self, flags: FlagRegister)            { self.set_register_byte(ByteRegisterLabel::F.shift(), flags.into()); }
+    pub fn set_flag_byte(&mut self, flags : FlagRegister)            { self.set_register_byte(ByteRegisterLabel::F.shift(), flags.into()); }
+
+    // 16 BIT
+    pub fn get_word(&self, label : WordRegisterLabel) -> u16
+    {
+        match label
+        {
+            WordRegisterLabel::AF => (self.get_byte(ByteRegisterLabel::A) as u16) << 8 | self.get_byte(ByteRegisterLabel::F) as u16,
+            WordRegisterLabel::BC => (self.get_byte(ByteRegisterLabel::B) as u16) << 8 | self.get_byte(ByteRegisterLabel::C) as u16,
+            WordRegisterLabel::DE => (self.get_byte(ByteRegisterLabel::D) as u16) << 8 | self.get_byte(ByteRegisterLabel::E) as u16,
+            WordRegisterLabel::HL => (self.get_byte(ByteRegisterLabel::H) as u16) << 8 | self.get_byte(ByteRegisterLabel::L) as u16,
+        }
+    }
+    pub fn set_word(&mut self, label : WordRegisterLabel, value : u16)
+    {
+        match label
+        {
+            WordRegisterLabel::AF => 
+            {
+                self.set_byte(ByteRegisterLabel::A, (value >> 8) as u8);
+                self.set_byte(ByteRegisterLabel::F, value as u8);
+            },
+            WordRegisterLabel::BC =>
+            {
+                self.set_byte(ByteRegisterLabel::B, (value >> 8) as u8);
+                self.set_byte(ByteRegisterLabel::C, value as u8);
+            },
+            WordRegisterLabel::DE =>
+            {
+                self.set_byte(ByteRegisterLabel::D, (value >> 8) as u8);
+                self.set_byte(ByteRegisterLabel::E, value as u8);
+            },
+            WordRegisterLabel::HL =>
+            {
+                self.set_byte(ByteRegisterLabel::H, (value >> 8) as u8);
+                self.set_byte(ByteRegisterLabel::L, value as u8);
+            }
+        }
+    }
+
 }
 
 impl ByteRegisterLabel

@@ -1,11 +1,15 @@
 use crate::registers::Registers;
 use crate::registers::ByteRegisterLabel;
 
+use crate::memory::Memory;
+
+use crate::cpu_instructions::add;
 
 pub struct CPU
 {
     pub registers    : Registers,
-    pub program_cntr : u16
+    pub program_cntr : u16,
+    pub memory       : Memory
 }
 
 pub enum Instruction
@@ -20,8 +24,27 @@ impl CPU
         CPU
         {
             registers    : Registers::new(),
-            program_cntr : 0
+            program_cntr : 0,
+            memory       : Memory::new()
         }
+    }
+
+    pub fn step(&mut self)
+    {
+        /*
+        let mut instruction_byte = self.memory.read_byte(self.program_cntr);
+
+        let next_program_cntr = if let Some(instruction) = Instruction::from_byte(instruction_byte)
+        {
+            self.execute(instruction)
+        } 
+        else
+        {
+            panic!("Unkown instruction found for: 0x{:x}", instruction_byte);
+        };
+      
+        self.program_cntr = next_program_cntr;
+        */
     }
 
     pub fn execute(&mut self, instruction : Instruction)
@@ -30,17 +53,9 @@ impl CPU
         {
             Instruction::ADD(target) =>
             {
-                let value = self.registers.get_byte(target);
-                let new_value = self.add(value);
+                let new_value = add(&mut self.registers, target);
                 self.registers.set_byte(ByteRegisterLabel::A, new_value);
             }
         }
     }
-
-    fn add(&mut self, value: u8) -> u8
-    {
-        let a_value = self.registers.get_byte(ByteRegisterLabel::A);
-        let (new_value, did_overflow) = a_value.overflowing_add(value);
-        new_value
-      }
 }
