@@ -11,7 +11,8 @@ pub struct FlagRegister
     pub carry      : bool
 }
 
-pub enum ByteRegisterLabel
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum ByteRegisterTarget
 {
     A,
     B,
@@ -23,7 +24,8 @@ pub enum ByteRegisterLabel
     L
 }
 
-pub enum WordRegisterLabel
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum WordRegisterTarget
 {
     AF,
     BC,
@@ -41,6 +43,22 @@ impl Registers
         }
     }
 
+    pub fn dump(&self)
+    {
+        println!("A: {:02X}", self.get_byte(ByteRegisterTarget::A));
+        println!("B: {:02X}", self.get_byte(ByteRegisterTarget::B));
+        println!("C: {:02X}", self.get_byte(ByteRegisterTarget::C));
+        println!("D: {:02X}", self.get_byte(ByteRegisterTarget::D));
+        println!("E: {:02X}", self.get_byte(ByteRegisterTarget::E));
+        println!("F: {:02X}", self.get_byte(ByteRegisterTarget::F));
+        println!("H: {:02X}", self.get_byte(ByteRegisterTarget::H));
+        println!("L: {:02X}", self.get_byte(ByteRegisterTarget::L));
+        println!("AF: {:04X}", self.get_word(WordRegisterTarget::AF));
+        println!("BC: {:04X}", self.get_word(WordRegisterTarget::BC));
+        println!("DE: {:04X}", self.get_word(WordRegisterTarget::DE));
+        println!("HL: {:04X}", self.get_word(WordRegisterTarget::HL));
+    }
+
     // Helpers
     fn get_register_byte(&self, shift : u8) -> u8    { ((self.raw_memory >> shift) & 0xFF) as u8 }
     fn set_register_byte(&mut self, shift: u8, value : u8)
@@ -50,66 +68,66 @@ impl Registers
     }
 
     // 8 BIT
-    pub fn get_byte(&self, label : ByteRegisterLabel) -> u8           { self.get_register_byte(label.shift()) }
-    pub fn set_byte(&mut self, label : ByteRegisterLabel, value : u8) { self.set_register_byte(label.shift(), value); }
+    pub fn get_byte(&self, label : ByteRegisterTarget) -> u8           { self.get_register_byte(label.shift()) }
+    pub fn set_byte(&mut self, label : ByteRegisterTarget, value : u8) { self.set_register_byte(label.shift(), value); }
 
-    pub fn get_flag_byte(&self) -> FlagRegister                     { self.get_register_byte(ByteRegisterLabel::F.shift()).into() }
-    pub fn set_flag_byte(&mut self, flags : FlagRegister)            { self.set_register_byte(ByteRegisterLabel::F.shift(), flags.into()); }
+    pub fn get_flag_byte(&self) -> FlagRegister                     { self.get_register_byte(ByteRegisterTarget::F.shift()).into() }
+    pub fn set_flag_byte(&mut self, flags : FlagRegister)            { self.set_register_byte(ByteRegisterTarget::F.shift(), flags.into()); }
 
     // 16 BIT
-    pub fn get_word(&self, label : WordRegisterLabel) -> u16
+    pub fn get_word(&self, label : WordRegisterTarget) -> u16
     {
         match label
         {
-            WordRegisterLabel::AF => (self.get_byte(ByteRegisterLabel::A) as u16) << 8 | self.get_byte(ByteRegisterLabel::F) as u16,
-            WordRegisterLabel::BC => (self.get_byte(ByteRegisterLabel::B) as u16) << 8 | self.get_byte(ByteRegisterLabel::C) as u16,
-            WordRegisterLabel::DE => (self.get_byte(ByteRegisterLabel::D) as u16) << 8 | self.get_byte(ByteRegisterLabel::E) as u16,
-            WordRegisterLabel::HL => (self.get_byte(ByteRegisterLabel::H) as u16) << 8 | self.get_byte(ByteRegisterLabel::L) as u16,
+            WordRegisterTarget::AF => (self.get_byte(ByteRegisterTarget::A) as u16) << 8 | self.get_byte(ByteRegisterTarget::F) as u16,
+            WordRegisterTarget::BC => (self.get_byte(ByteRegisterTarget::B) as u16) << 8 | self.get_byte(ByteRegisterTarget::C) as u16,
+            WordRegisterTarget::DE => (self.get_byte(ByteRegisterTarget::D) as u16) << 8 | self.get_byte(ByteRegisterTarget::E) as u16,
+            WordRegisterTarget::HL => (self.get_byte(ByteRegisterTarget::H) as u16) << 8 | self.get_byte(ByteRegisterTarget::L) as u16,
         }
     }
-    pub fn set_word(&mut self, label : WordRegisterLabel, value : u16)
+    pub fn set_word(&mut self, label : WordRegisterTarget, value : u16)
     {
         match label
         {
-            WordRegisterLabel::AF => 
+            WordRegisterTarget::AF => 
             {
-                self.set_byte(ByteRegisterLabel::A, (value >> 8) as u8);
-                self.set_byte(ByteRegisterLabel::F, value as u8);
+                self.set_byte(ByteRegisterTarget::A, (value >> 8) as u8);
+                self.set_byte(ByteRegisterTarget::F, value as u8);
             },
-            WordRegisterLabel::BC =>
+            WordRegisterTarget::BC =>
             {
-                self.set_byte(ByteRegisterLabel::B, (value >> 8) as u8);
-                self.set_byte(ByteRegisterLabel::C, value as u8);
+                self.set_byte(ByteRegisterTarget::B, (value >> 8) as u8);
+                self.set_byte(ByteRegisterTarget::C, value as u8);
             },
-            WordRegisterLabel::DE =>
+            WordRegisterTarget::DE =>
             {
-                self.set_byte(ByteRegisterLabel::D, (value >> 8) as u8);
-                self.set_byte(ByteRegisterLabel::E, value as u8);
+                self.set_byte(ByteRegisterTarget::D, (value >> 8) as u8);
+                self.set_byte(ByteRegisterTarget::E, value as u8);
             },
-            WordRegisterLabel::HL =>
+            WordRegisterTarget::HL =>
             {
-                self.set_byte(ByteRegisterLabel::H, (value >> 8) as u8);
-                self.set_byte(ByteRegisterLabel::L, value as u8);
+                self.set_byte(ByteRegisterTarget::H, (value >> 8) as u8);
+                self.set_byte(ByteRegisterTarget::L, value as u8);
             }
         }
     }
 
 }
 
-impl ByteRegisterLabel
+impl ByteRegisterTarget
 {
     fn shift(&self) -> u8
     {
         match self
         {
-            ByteRegisterLabel::A => 0,
-            ByteRegisterLabel::B => 8,
-            ByteRegisterLabel::C => 16,
-            ByteRegisterLabel::D => 24,
-            ByteRegisterLabel::E => 32,
-            ByteRegisterLabel::F => 40,
-            ByteRegisterLabel::H => 48,
-            ByteRegisterLabel::L => 56,
+            ByteRegisterTarget::A => 0,
+            ByteRegisterTarget::B => 8,
+            ByteRegisterTarget::C => 16,
+            ByteRegisterTarget::D => 24,
+            ByteRegisterTarget::E => 32,
+            ByteRegisterTarget::F => 40,
+            ByteRegisterTarget::H => 48,
+            ByteRegisterTarget::L => 56,
         }
     }
 }
