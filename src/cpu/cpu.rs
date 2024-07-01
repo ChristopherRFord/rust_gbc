@@ -1,5 +1,4 @@
 use crate::cpu::cpu_registers::Registers;
-use crate::cpu::cpu_registers::ByteRegisterTarget;
 use crate::cpu::cpu_instructions::Instruction;
 use crate::memory::Memory;
 
@@ -8,7 +7,6 @@ use crate::cpu::cpu_instructions::inc16;
 use crate::cpu::cpu_instructions::dec8;
 use crate::cpu::cpu_instructions::dec16;
 use crate::cpu::cpu_instructions::add;
-use crate::cpu::cpu_instructions::addhl;
 
 pub struct CPU
 {
@@ -50,10 +48,11 @@ impl CPU
 
     pub fn step(&mut self)
     {
-        let mut instruction_byte = self.memory.read_byte(self.program_cntr);
-        let next_program_cntr = if let Some(instruction) = Instruction::from_byte(instruction_byte, false)
+        let instruction_byte = self.memory.read_byte(self.program_cntr);
+        if let Some(instruction) = Instruction::from_byte(instruction_byte, false)
         {
-            self.program_cntr = self.execute(instruction)
+            self.execute(instruction);
+            self.program_cntr += 0x1;
         } 
         else
         {
@@ -62,7 +61,7 @@ impl CPU
 
     }
 
-    pub fn execute(&mut self, instruction : Instruction)-> u16
+    pub fn execute(&mut self, instruction : Instruction)
     {
         match instruction
         {
@@ -71,9 +70,6 @@ impl CPU
             Instruction::DEC8(target)  => { dec8(&mut self.registers, target); }
             Instruction::DEC16(target) => { dec16(&mut self.registers, target); }
             Instruction::ADD(target)   => { add(&mut self.registers, target); }
-            Instruction::ADDHL(target) => { addhl(&mut self.registers, target); }
         }
-
-        self.program_cntr + 0x1
     }
 }

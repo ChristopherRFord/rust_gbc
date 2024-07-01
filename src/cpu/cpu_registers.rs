@@ -1,8 +1,9 @@
 pub struct Registers
 {
-    raw_memory : u64
+    pub raw_memory : u64
 }
 
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct FlagRegister
 {
     pub zero       : bool,
@@ -45,18 +46,23 @@ impl Registers
 
     pub fn dump(&self)
     {
-        println!("A: {:02X}", self.get_byte(ByteRegisterTarget::A));
-        println!("B: {:02X}", self.get_byte(ByteRegisterTarget::B));
-        println!("C: {:02X}", self.get_byte(ByteRegisterTarget::C));
-        println!("D: {:02X}", self.get_byte(ByteRegisterTarget::D));
-        println!("E: {:02X}", self.get_byte(ByteRegisterTarget::E));
-        println!("F: {:02X}", self.get_byte(ByteRegisterTarget::F));
-        println!("H: {:02X}", self.get_byte(ByteRegisterTarget::H));
-        println!("L: {:02X}", self.get_byte(ByteRegisterTarget::L));
-        println!("AF: {:04X}", self.get_word(WordRegisterTarget::AF));
-        println!("BC: {:04X}", self.get_word(WordRegisterTarget::BC));
-        println!("DE: {:04X}", self.get_word(WordRegisterTarget::DE));
-        println!("HL: {:04X}", self.get_word(WordRegisterTarget::HL));
+        let flags = self.get_flag_byte();
+        println!("A  : 0x{:02X}", self.get_byte(ByteRegisterTarget::A));
+        println!("B  : 0x{:02X}", self.get_byte(ByteRegisterTarget::B));
+        println!("C  : 0x{:02X}", self.get_byte(ByteRegisterTarget::C));
+        println!("D  : 0x{:02X}", self.get_byte(ByteRegisterTarget::D));
+        println!("E  : 0x{:02X}", self.get_byte(ByteRegisterTarget::E));
+        println!("F  : 0x{:02X}", self.get_byte(ByteRegisterTarget::F));
+        println!("H  : 0x{:02X}", self.get_byte(ByteRegisterTarget::H));
+        println!("L  : 0x{:02X}", self.get_byte(ByteRegisterTarget::L));
+        println!("AF : 0x{:04X}", self.get_word(WordRegisterTarget::AF));
+        println!("BC : 0x{:04X}", self.get_word(WordRegisterTarget::BC));
+        println!("DE : 0x{:04X}", self.get_word(WordRegisterTarget::DE));
+        println!("HL : 0x{:04X}", self.get_word(WordRegisterTarget::HL));
+        println!("Zero Flag:       {}", flags.zero);
+        println!("Subtract Flag:   {}", flags.subtract);
+        println!("Half Carry Flag: {}", flags.half_carry);
+        println!("Carry Flag:      {}", flags.carry);
     }
 
     // Helpers
