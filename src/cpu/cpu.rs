@@ -1,15 +1,14 @@
-use crate::cpu_instructions::Instruction;
-
-use crate::registers::Registers;
-use crate::registers::ByteRegisterTarget;
-
+use crate::cpu::cpu_registers::Registers;
+use crate::cpu::cpu_registers::ByteRegisterTarget;
+use crate::cpu::cpu_instructions::Instruction;
 use crate::memory::Memory;
 
-use crate::cpu_instructions::add;
-use crate::cpu_instructions::inc8;
-use crate::cpu_instructions::inc16;
-use crate::cpu_instructions::dec8;
-use crate::cpu_instructions::dec16;
+use crate::cpu::cpu_instructions::inc8;
+use crate::cpu::cpu_instructions::inc16;
+use crate::cpu::cpu_instructions::dec8;
+use crate::cpu::cpu_instructions::dec16;
+use crate::cpu::cpu_instructions::add;
+use crate::cpu::cpu_instructions::addhl;
 
 pub struct CPU
 {
@@ -67,11 +66,12 @@ impl CPU
     {
         match instruction
         {
-            Instruction::ADD(target)   => { add(&mut self.registers, target); }
             Instruction::INC8(target)  => { inc8(&mut self.registers, target); }
             Instruction::INC16(target) => { inc16(&mut self.registers, target); }
             Instruction::DEC8(target)  => { dec8(&mut self.registers, target); }
-            Instruction::DEC16(target)  => { dec16(&mut self.registers, target); }
+            Instruction::DEC16(target) => { dec16(&mut self.registers, target); }
+            Instruction::ADD(target)   => { add(&mut self.registers, target); }
+            Instruction::ADDHL(target) => { addhl(&mut self.registers, target); }
         }
 
         self.program_cntr + 0x1

@@ -1,15 +1,15 @@
-use crate::registers::Registers;
-use crate::registers::ByteRegisterTarget;
-use crate::registers::WordRegisterTarget;
+use crate::cpu::cpu_registers::Registers;
+use crate::cpu::cpu_registers::ByteRegisterTarget;
+use crate::cpu::cpu_registers::WordRegisterTarget;
 
 pub enum Instruction
 {
-    ADD(ByteRegisterTarget),
-
     INC8(ByteRegisterTarget),
     INC16(WordRegisterTarget),
     DEC8(ByteRegisterTarget),
-    DEC16(WordRegisterTarget)
+    DEC16(WordRegisterTarget),
+    ADD(ByteRegisterTarget),
+    ADDHL(WordRegisterTarget)
 }
 
 impl Instruction
