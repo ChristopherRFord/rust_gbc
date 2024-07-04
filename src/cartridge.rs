@@ -1,27 +1,25 @@
 use std::fs::File;
-use std::io::{self, Read};
+use std::io::Read;
 use std::path::Path;
 
-pub struct Cart
+pub struct Cartridge
 {
-    file_name  : String,
-    rom_size   : u32,
-    rom_data   : Vec<u8>
+    rom_size : u32,
+    rom_data : Vec<u8>
 }
 
-impl Cart
+impl Cartridge
 {
     pub fn new() -> Self
     {
-        Cart
+        Cartridge
         {
-            file_name  : String::new(),
             rom_size   : 0,
             rom_data   : Vec::new()
         }
     }
 
-    pub fn load_cart(&mut self, location : &str) -> io::Result<()>
+    pub fn load_cart(&mut self, location : &str)
     {
         let path = Path::new(location);
         let mut file = match File::open(&path)
@@ -34,18 +32,29 @@ impl Cart
             Err(e) =>
             {
                 eprintln!("Failed to open file '{}': {}", location, e);
-                return Err(e);
+                return;
             }
         };
 
-        self.file_name = path.file_name().and_then(|name| name.to_str()).unwrap_or("unknown").to_string();
-        self.rom_size  = file.metadata()?.len() as u32;
+        self.rom_size  = match file.metadata()
+        {
+            Ok(metadata) => metadata.len() as u32,
+            Err(e) =>
+            {
+                eprintln!("Failed to get metadata for '{}': {}", location, e);
+                return;
+            }
+        };
         self.rom_data.resize(self.rom_size as usize, 0);
-        file.read_exact(&mut self.rom_data)?;
+        if let Err(e) = file.read_exact(&mut self.rom_data)
+        {
+            eprintln!("Failed to read file '{}': {}", location, e);
+        }
+    }
 
-        self.print_info();
-
-        Ok(())
+    pub fn read(&self, address : u16) -> u8
+    {
+        self.rom_data[address as usize]
     }
 
 
