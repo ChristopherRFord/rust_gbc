@@ -165,6 +165,54 @@ impl<'a> CPU<'a>
             0x3D => self.alu_dec(ByteRegister::A),           // DEC A
             0x3E => self.cpu_ld_8_r(ByteRegister::A),        // LD A,d8,
             0x3F => self.alu_ccf(),                          // CCF
+            0x40 => self.cpu_nop(),                          // LD B,B (NOP)
+            0x41 => self.cpu_ld_r_r(ByteRegister::B, ByteRegister::C), // LD B,C
+            0x42 => self.cpu_ld_r_r(ByteRegister::B, ByteRegister::D), // LD B,D
+            0x43 => self.cpu_ld_r_r(ByteRegister::B, ByteRegister::E), // LD B,E
+            0x44 => self.cpu_ld_r_r(ByteRegister::B, ByteRegister::H), // LD B,H
+            0x45 => self.cpu_ld_r_r(ByteRegister::B, ByteRegister::L), // LD B,L
+            0x46 => self.cpu_ld_r_r16(ByteRegister::B, WordRegister::HL), //LD B (HL)
+            0x47 => self.cpu_ld_r_r(ByteRegister::B, ByteRegister::A),
+            0x48 => self.cpu_ld_r_r(ByteRegister::C, ByteRegister::B),
+            0x49 => self.cpu_nop(),
+            0x4A => self.cpu_ld_r_r(ByteRegister::C, ByteRegister::D),
+            0x4B => self.cpu_ld_r_r(ByteRegister::C, ByteRegister::E),
+            0x4C => self.cpu_ld_r_r(ByteRegister::C, ByteRegister::H),
+            0x4D => self.cpu_ld_r_r(ByteRegister::C, ByteRegister::L),
+            0x4E => self.cpu_ld_r_r16(ByteRegister::C, WordRegister::HL),
+            0x4F => self.cpu_ld_r_r(ByteRegister::C, ByteRegister::A),
+            0x50 => self.cpu_ld_r_r(ByteRegister::D, ByteRegister::B),
+            0x51 => self.cpu_ld_r_r(ByteRegister::D, ByteRegister::C),
+            0x52 => self.cpu_nop(),
+            0x53 => self.cpu_ld_r_r(ByteRegister::D, ByteRegister::E),
+            0x54 => self.cpu_ld_r_r(ByteRegister::D, ByteRegister::H),
+            0x55 => self.cpu_ld_r_r(ByteRegister::D, ByteRegister::L),
+            0x56 => self.cpu_ld_r_r16(ByteRegister::D, WordRegister::HL),
+            0x57 => self.cpu_ld_r_r(ByteRegister::D, ByteRegister::A),
+            0x58 => self.cpu_ld_r_r(ByteRegister::E, ByteRegister::B),
+            0x59 => self.cpu_ld_r_r(ByteRegister::E, ByteRegister::C),
+            0x5A => self.cpu_ld_r_r(ByteRegister::E, ByteRegister::D),
+            0x5B => self.cpu_nop(),
+            0x5C => self.cpu_ld_r_r(ByteRegister::E, ByteRegister::H),
+            0x5D => self.cpu_ld_r_r(ByteRegister::E, ByteRegister::L),
+            0x5E => self.cpu_ld_r_r16(ByteRegister::E, WordRegister::HL),
+            0x5F => self.cpu_ld_r_r(ByteRegister::E, ByteRegister::A),
+            0x60 => self.cpu_ld_r_r(ByteRegister::H, ByteRegister::B),
+            0x61 => self.cpu_ld_r_r(ByteRegister::H, ByteRegister::C),
+            0x62 => self.cpu_ld_r_r(ByteRegister::H, ByteRegister::D),
+            0x63 => self.cpu_ld_r_r(ByteRegister::H, ByteRegister::E),
+            0x64 => self.cpu_nop(),
+            0x65 => self.cpu_ld_r_r(ByteRegister::H, ByteRegister::L),
+            0x66 => self.cpu_ld_r_r16(ByteRegister::H, WordRegister::HL),
+            0x67 => self.cpu_ld_r_r(ByteRegister::H, ByteRegister::A),
+            0x68 => self.cpu_ld_r_r(ByteRegister::L, ByteRegister::B),
+            0x69 => self.cpu_ld_r_r(ByteRegister::L, ByteRegister::C),
+            0x6A => self.cpu_ld_r_r(ByteRegister::L, ByteRegister::D),
+            0x6B => self.cpu_ld_r_r(ByteRegister::L, ByteRegister::E),
+            0x6C => self.cpu_ld_r_r(ByteRegister::L, ByteRegister::H),
+            0x6D => self.cpu_nop(),
+            0x6E => self.cpu_ld_r_r16(ByteRegister::L, WordRegister::HL),
+            0x6F => self.cpu_ld_r_r(ByteRegister::L, ByteRegister::A),
             _ =>
             {
                 println!("Unrecognized opcode {:02X}", self.curr_opcode)
@@ -245,6 +293,16 @@ impl<'a> CPU<'a>
         let value = self.memory_bus.read(self.program_cntr);
         self.registers.write(register, value);
         self.inc_program_cntr(1);
+    }
+    fn cpu_ld_r_r(&mut self, from : ByteRegister, to : ByteRegister)
+    {
+        let value = self.registers.read(from);
+        self.registers.write(to, value);
+    }
+    fn cpu_ld_r_r16(&mut self, from : ByteRegister, to : WordRegister)
+    {
+        let value = self.registers.read(from);
+        self.registers.write16(to, value as u16);
     }
 
     // =======
