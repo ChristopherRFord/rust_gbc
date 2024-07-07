@@ -86,7 +86,7 @@ impl<'a> CPU<'a>
             0x15 => alu::dec(&mut self.regs, Reg8::D),
             0x16 => ld::imm8_to_reg8(&self.bus, &mut self.pcntr, &mut self.regs, Reg8::D),
             0x17 => shift::rl(&mut self.regs, Reg8::A),
-            0x18 => jump::jr(&self.bus, &mut self.pcntr),
+            0x18 => jump::jr8(&self.bus, &mut self.pcntr),
             0x19 => alu::add16(&mut self.regs, Reg16::DE, Reg16::HL),
             0x1A => ld::mem8_to_reg8(&self.bus, &mut self.regs, Reg16::DE, Reg8::A),
             0x1B => alu::dec16(&mut self.regs, Reg16::DE),
@@ -95,7 +95,7 @@ impl<'a> CPU<'a>
             0x1E => ld::imm8_to_reg8(&self.bus, &mut self.pcntr, &mut self.regs, Reg8::E),
             0x1F => shift::rr(&mut self.regs, Reg8::A),
             //-------
-            0x20 => jump::jr_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::Z, false),
+            0x20 => jump::jr8_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::Z, false),
             0x21 => ld::imm16_to_reg16(&self.bus, &mut self.pcntr, &mut self.regs, Reg16::HL),
             0x22 => ld::reg8_to_mem8_inc(&mut self.bus, &mut self.regs, Reg16::HL, Reg8::A),
             0x23 => alu::inc16(&mut self.regs, Reg16::HL),
@@ -103,7 +103,7 @@ impl<'a> CPU<'a>
             0x25 => alu::dec(&mut self.regs, Reg8::H),
             0x26 => ld::imm8_to_reg8(&self.bus, &mut self.pcntr, &mut self.regs, Reg8::H),
             0x27 => alu::da(&mut self.regs, Reg8::A),
-            0x28 => jump::jr_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::Z, true),
+            0x28 => jump::jr8_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::Z, true),
             0x29 => alu::add16(&mut self.regs, Reg16::HL, Reg16::HL),
             0x2A => ld::mem8_to_reg8_inc(&self.bus, &mut self.regs, Reg16::HL, Reg8::A),
             0x2B => alu::dec16(&mut self.regs, Reg16::HL),
@@ -112,7 +112,7 @@ impl<'a> CPU<'a>
             0x2E => ld::imm8_to_reg8(&self.bus, &mut self.pcntr, &mut self.regs, Reg8::L),
             0x2F => alu::cpl(&mut self.regs, Reg8::A),
             //-------
-            0x30 => jump::jr_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::C, false),
+            0x30 => jump::jr8_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::C, false),
             0x31 => ld::imm16_to_reg16(&self.bus, &mut self.pcntr, &mut self.regs, Reg16::SP),
             0x32 => ld::reg8_to_mem8_dec(&mut self.bus, &mut self.regs, Reg16::HL, Reg8::A),
             0x33 => alu::inc16(&mut self.regs, Reg16::SP),
@@ -120,7 +120,7 @@ impl<'a> CPU<'a>
             0x35 => alu::dec16(&mut self.regs, Reg16::HL),
             0x36 => ld::imm8_to_reg16(&self.bus, &mut self.pcntr, &mut self.regs, Reg16::HL),
             0x37 => alu::scf(&mut self.regs),
-            0x38 => jump::jr_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::C, true),
+            0x38 => jump::jr8_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::C, true),
             0x39 => alu::add16(&mut self.regs, Reg16::SP, Reg16::HL),
             0x3A => ld::mem8_to_reg8_dec(&self.bus, &mut self.regs, Reg16::HL, Reg8::A),
             0x3B => alu::dec16(&mut self.regs, Reg16::SP),
@@ -264,6 +264,37 @@ impl<'a> CPU<'a>
             0xBD => alu::cp8(&mut self.regs, Reg8::L, Reg8::A),
             0xBE => alu::cp16_to_8(&mut self.regs, Reg16::HL, Reg8::A),
             0xBF => alu::cp8(&mut self.regs, Reg8::A, Reg8::A),
+            //-------
+            //0xC0
+            0xC1 => ld::pop16(&mut self.regs, Reg16::BC),
+            0xC2 => jump::jr16_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::Z, false),
+            0xC3 => jump::jr16(&self.bus, &mut self.pcntr),
+            //0xC4
+            0xC5 => ld::push16(&mut self.regs, Reg16::BC),
+            0xC6 => alu::add8_mem(&self.bus, &mut self.pcntr, &mut self.regs, Reg8::A),
+            //0xC7
+            //0xC8
+            //0xC9
+            0xCA => jump::jr16_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::Z, true),
+            //0xCB
+            //0xCC
+            //0xCD
+            0xCE => alu::add8_mem(&self.bus, &mut self.pcntr, &mut self.regs, Reg8::A),
+            //0xCF
+            //-------
+            //0xD0
+            0xD1 => ld::pop16(&mut self.regs, Reg16::DE),
+            0xD2 => jump::jr16_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::C, false),
+            //0xD4
+            0xD5 => ld::push16(&mut self.regs, Reg16::DE),
+            0xD6 => alu::sub8_mem(&self.bus, &mut self.pcntr, &mut self.regs, Reg8::A),
+            //0xD7
+            //0xD8
+            //0xD9
+            0xDA => jump::jr16_cond(&self.bus, &mut self.pcntr, &self.regs, RegF::C, true),
+            //0xDC
+            0xDE => alu::sbc8_mem(&self.bus, &mut self.pcntr, &mut self.regs, Reg8::A),
+            //0xDF
             _ =>
             {
                 println!("Asd");

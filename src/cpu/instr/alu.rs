@@ -1,5 +1,7 @@
 pub mod alu
 {
+    use crate::bus::Bus;
+    use crate::cpu::pcntr::PCntr;
     use crate::cpu::registers::RegF;
     use crate::cpu::registers::Reg8;
     use crate::cpu::registers::Reg16;
@@ -37,6 +39,37 @@ pub mod alu
         regs.writef(RegF::H, (to_v & 0xF) + (from_v & 0xF) > 0xF);
         regs.writef(RegF::C, (to_v as u16 + from_v as u16) > 0xFF);
     }
+    pub fn add8_mem(bus   : &Bus,
+                    pcntr : &mut PCntr,
+                    regs  : &mut Registers,
+                    to    : Reg8)
+    {
+        let offset = bus.read8(pcntr.cntr());
+        let value  = regs.read8(to);
+        let result = value.wrapping_add(offset);
+
+        regs.write8(to, result);
+        regs.writef(RegF::Z, result == 0);
+        regs.writef(RegF::S, false);
+        regs.writef(RegF::H, (offset & 0xF) + (value & 0xF) > 0xF);
+        regs.writef(RegF::C, (offset as u16 + value as u16) > 0xFF);
+    }
+    pub fn adc8_mem(bus   : &Bus,
+                    pcntr : &mut PCntr,
+                    regs  : &mut Registers,
+                    to    : Reg8)
+    {
+        let offset = bus.read8(pcntr.cntr());
+        let value  = regs.read8(to);
+        let carry  = if regs.readf(RegF::C) { 1 } else { 0 };
+        let result = value.wrapping_add(offset).wrapping_add(carry);
+
+        regs.write8(to, result);
+        regs.writef(RegF::Z, result == 0);
+        regs.writef(RegF::S, false);
+        regs.writef(RegF::H, (offset & 0xF) + (value & 0xF) > 0xF);
+        regs.writef(RegF::C, (offset as u16 + value as u16) > 0xFF);
+    }
     pub fn sub8(regs : &mut Registers,
                 from : Reg8,
                 to   : Reg8)
@@ -65,6 +98,37 @@ pub mod alu
         regs.writef(RegF::S, true);
         regs.writef(RegF::H, (to_v & 0xF) + (from_v & 0xF) > 0xF);
         regs.writef(RegF::C, (to_v as u16 + from_v as u16) > 0xFF);
+    }
+    pub fn sub8_mem(bus   : &Bus,
+                    pcntr : &mut PCntr,
+                    regs  : &mut Registers,
+                    to    : Reg8)
+    {
+        let offset = bus.read8(pcntr.cntr());
+        let value  = regs.read8(to);
+        let result = value.wrapping_sub(offset);
+
+        regs.write8(to, result);
+        regs.writef(RegF::Z, result == 0);
+        regs.writef(RegF::S, true);
+        regs.writef(RegF::H, (value & 0xF) + (offset & 0xF) > 0xF);
+        regs.writef(RegF::C, (value as u16 + offset as u16) > 0xFF);
+    }
+    pub fn sbc8_mem(bus   : &Bus,
+                    pcntr : &mut PCntr,
+                    regs  : &mut Registers,
+                    to    : Reg8)
+    {
+        let offset = bus.read8(pcntr.cntr());
+        let value  = regs.read8(to);
+        let carry  = if regs.readf(RegF::C) { 1 } else { 0 };
+        let result = value.wrapping_sub(offset).wrapping_sub(carry);
+
+        regs.write8(to, result);
+        regs.writef(RegF::Z, result == 0);
+        regs.writef(RegF::S, true);
+        regs.writef(RegF::H, (value & 0xF) + (offset & 0xF) > 0xF);
+        regs.writef(RegF::C, (value as u16 + offset as u16) > 0xFF);
     }
     pub fn inc(regs : &mut Registers,
                reg  : Reg8)
