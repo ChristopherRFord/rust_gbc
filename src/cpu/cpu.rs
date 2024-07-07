@@ -228,7 +228,7 @@ impl<'a> CPU<'a>
             0x9B => alu::sbc8(&mut self.regs, Reg8::E, Reg8::A),
             0x9C => alu::sbc8(&mut self.regs, Reg8::H, Reg8::A),
             0x9D => alu::sbc8(&mut self.regs, Reg8::L, Reg8::A),
-            0x9D => alu::sbc16_to_8(&mut self.regs, Reg16::HL, Reg8::A),
+            0x9E => alu::sbc16_to_8(&mut self.regs, Reg16::HL, Reg8::A),
             0x9F => alu::sbc8(&mut self.regs, Reg8::A, Reg8::A),
             //-------
             0xA0 => alu::and8(&mut self.regs, Reg8::B, Reg8::A),

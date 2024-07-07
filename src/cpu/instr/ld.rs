@@ -139,13 +139,13 @@ pub mod ld
     {
         let value  = regs.read16(Reg16::SP);
         let result = value.wrapping_add(1);
-        regs.write16(reg, value);
+        regs.write16(reg, result);
     }
     pub fn push16(regs : &mut Registers,
                   reg  : Reg16)
     {
         let value  = regs.read16(Reg16::SP);
         let result = value.wrapping_sub(1);
-        regs.write16(reg, value);
+        regs.write16(reg, result);
     }
 }
