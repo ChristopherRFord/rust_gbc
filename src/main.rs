@@ -1,8 +1,8 @@
-pub mod rust_gbc;
-pub mod cartridge;
+pub mod cart;
 pub mod cpu;
+pub mod bus;
 pub mod mmu;
-pub mod memory_bus;
+pub mod rust_gbc;
 
 pub use rust_gbc::RustGBC;
 

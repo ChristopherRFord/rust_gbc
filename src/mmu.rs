@@ -13,8 +13,8 @@ impl MMU
         }
     }
 
-    pub fn read(&self, address : u16) -> u8          { self.memory[address as usize] }
-    pub fn write(&mut self, address: u16, value: u8) { self.memory[address as usize] = value; }
+    pub fn read8(&self, address : u16) -> u8          { self.memory[address as usize] }
+    pub fn write8(&mut self, address: u16, value: u8) { self.memory[address as usize] = value; }
 
     pub fn read16(&self, address : u16) -> u16
     {
@@ -24,7 +24,7 @@ impl MMU
     }
     pub fn write16(&mut self, address: u16, value: u16)
     {
-        let low = (value & 0xFF) as u8;
+        let low  = (value & 0xFF) as u8;
         let high = (value >> 8) as u8;
         self.memory[address as usize] = low;
         self.memory[(address + 1) as usize] = high;

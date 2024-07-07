@@ -2,26 +2,37 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
-pub struct Cartridge
+pub struct Cart
 {
     rom_size : u32,
     rom_data : Vec<u8>
 }
 
-impl Cartridge
+impl Cart
 {
     pub fn new() -> Self
     {
-        Cartridge
+        Cart
         {
-            rom_size   : 0,
-            rom_data   : Vec::new()
+            rom_size : 0,
+            rom_data : Vec::new()
         }
+    }
+
+    pub fn print_info(&self)
+    {
+        println!("Cart Loaded");
+        println!("\tTitle     : {}",        self.title_str());
+        println!("\tLIC Code  : {:02X} {}", self.lic_code(), self.lic_code_str());
+        println!("\tType      : {:02X} {}", self.rom_type(), self.rom_type_str());
+        println!("\tROM Size  : {:02X} {}", self.rom_size(), self.rom_size_str());
+        println!("\tRAM Size  : {:02X} {}", self.ram_size(), self.ram_size_str());
+        println!("\tChecksum  : {:02X} ({})", self.header_checksum(), self.verify_header_checksum());
     }
 
     pub fn load_cart(&mut self, location : &str)
     {
-        let path = Path::new(location);
+        let path     = Path::new(location);
         let mut file = match File::open(&path)
         {
             Ok(file) => 
@@ -52,9 +63,13 @@ impl Cartridge
         }
     }
 
-    pub fn read(&self, address : u16) -> u8
+    pub fn read8(&self, address : u16) -> u8
     {
         self.rom_data[address as usize]
+    }
+    pub fn read16(&self, address : u16) -> u16
+    {
+        0
     }
 
 
@@ -278,16 +293,5 @@ impl Cartridge
         }
 
         checksum == self.header_checksum()
-    }
-
-    pub fn print_info(&self)
-    {
-        println!("Cartridge Loaded");
-        println!("\tTitle     : {}",        self.title_str());
-        println!("\tLIC Code  : {:02X} {}", self.lic_code(), self.lic_code_str());
-        println!("\tType      : {:02X} {}", self.rom_type(), self.rom_type_str());
-        println!("\tROM Size  : {:02X} {}", self.rom_size(), self.rom_size_str());
-        println!("\tRAM Size  : {:02X} {}", self.ram_size(), self.ram_size_str());
-        println!("\tChecksum  : {:02X} ({})", self.header_checksum(), self.verify_header_checksum());
     }
 }
