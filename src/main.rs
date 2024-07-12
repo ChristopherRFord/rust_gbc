@@ -1,13 +1,16 @@
-pub mod cart;
-pub mod cpu;
 pub mod bus;
-pub mod mmu;
-pub mod rust_gbc;
+pub mod cpu;
+pub mod cpu_enums;
+pub mod cart;
+pub mod console;
+pub mod instructions;
+pub mod mem;
+pub mod regs;
 
-pub use rust_gbc::RustGBC;
+pub use console::Console;
 
 fn main()
 {
-    let gbc = RustGBC::new();
-    gbc.start();
+    let mut console = Console::new();
+    console.start("/workspace/Rust/rust_gbc/roms/dmg-acid2.gb");
 }

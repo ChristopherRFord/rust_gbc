@@ -14,7 +14,7 @@ impl Cart
     {
         Cart
         {
-            rom_size : 0,
+            rom_size : 0x00000000,
             rom_data : Vec::new()
         }
     }
@@ -30,20 +30,42 @@ impl Cart
         println!("\tChecksum  : {:02X} ({})", self.header_checksum(), self.verify_header_checksum());
     }
 
-    pub fn load_cart(&mut self, location : &str)
+    pub fn read8(&self, address : u16) -> u8
     {
-        let path     = Path::new(location);
+        self.rom_data[address as usize]
+    }
+    pub fn read16(&self, address: u16) -> u16
+    {
+        let low_byte = self.read8(address) as u16;
+        let high_byte = self.read8(address + 1) as u16;
+        (high_byte << 8) | low_byte
+    }
+    pub fn write8(&mut self, address : u16, value : u8)
+    {
+        self.rom_data[address as usize] = value;
+    }
+    pub fn write16(&mut self, address : u16, value : u16)
+    {
+        let low_byte  = (value & 0xFF) as u8;
+        let high_byte = (value >> 8) as u8;
+        self.write8(address, low_byte);
+        self.write8(address + 1, high_byte);
+    }
+
+    pub fn load(&mut self, rom_path : &str) -> bool
+    {
+        let path     = Path::new(rom_path);
         let mut file = match File::open(&path)
         {
             Ok(file) => 
             {
-                println!("Opened: {}", location);
+                println!("Opened: {}", rom_path);
                 file
             },
             Err(e) =>
             {
-                eprintln!("Failed to open file '{}': {}", location, e);
-                return;
+                eprintln!("Failed to open file '{}': {}", rom_path, e);
+                return false;
             }
         };
 
@@ -52,27 +74,18 @@ impl Cart
             Ok(metadata) => metadata.len() as u32,
             Err(e) =>
             {
-                eprintln!("Failed to get metadata for '{}': {}", location, e);
-                return;
+                eprintln!("Failed to get metadata for '{}': {}", rom_path, e);
+                return false;
             }
         };
         self.rom_data.resize(self.rom_size as usize, 0);
         if let Err(e) = file.read_exact(&mut self.rom_data)
         {
-            eprintln!("Failed to read file '{}': {}", location, e);
+            eprintln!("Failed to read file '{}': {}", rom_path, e);
         }
-    }
 
-    pub fn read8(&self, address : u16) -> u8
-    {
-        self.rom_data[address as usize]
+        true
     }
-    pub fn read16(&self, address : u16) -> u16
-    {
-        0
-    }
-
-
     pub fn logo(&self) -> &[u8]
     {
         &self.rom_data[0x104..=0x133]
